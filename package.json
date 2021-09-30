@@ -1,0 +1,11 @@
+{
+  "name": "js-blockchain",
+  "version": "1.0.0",
+  "description": "Blockchain and decentralized network in JavaScript",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Daniel Molina",
+  "license": "ISC"
+}
