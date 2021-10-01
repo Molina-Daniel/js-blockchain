@@ -14,8 +14,8 @@ app.get('/blockchain', function (req, res) {
 
 // End-point to create a transaction in the blockchain
 app.post('/transaction', function (req, res) {
-   console.log(req.body);
-   res.send(`The amount of the transaction is ${req.body.amount} bitcoins.`);
+   const blockIndex = bitcoin.createNewTransaction(req.body.amount, req.body.sender, req.body.recipient);
+   res.json({ note: `Trasaction will be added in block ${blockIndex}.` });
 });
 
 // End-point to mine/create a new block
