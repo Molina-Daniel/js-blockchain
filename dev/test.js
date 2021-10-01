@@ -9,7 +9,7 @@ const currentBlockData = [
       recipient: '97GDSAFUBSAGDIF'
    },
    {
-      amount: 31,
+      amount: 30,
       sender: '97GDSAFUBSAGDIF',
       recipient: 'OKAJSGD97ADFUGASD'
    },
@@ -19,9 +19,11 @@ const currentBlockData = [
       recipient: 'GKJASD8F7G08SADGF'
    }
 ];
-const nonce = 100;
+// const nonce = 100;
 
-console.log(bitcoin.hashBlock(previousBlockHash, currentBlockData, nonce));
+// console.log(bitcoin.proofOfWork(previousBlockHash, currentBlockData)); // returns nonce = 28085
+console.log(bitcoin.hashBlock(previousBlockHash, currentBlockData, 28085));
+
 
 // bitcoin.createNewBlock(2435, '1U3G8T41038', '93FSEJGF983');
 
