@@ -1,18 +1,39 @@
 const Blockchain = require('./blockchain');
-
 const bitcoin = new Blockchain();
 
-bitcoin.createNewBlock(2435, '1U3G8T41038', '93FSEJGF983');
+const previousBlockHash = 'SDFGHHSD435Y24H24HGDSFH';
+const currentBlockData = [
+   {
+      amount: 10,
+      sender: 'HGVHVJ876598HJKVK',
+      recipient: '97GDSAFUBSAGDIF'
+   },
+   {
+      amount: 31,
+      sender: '97GDSAFUBSAGDIF',
+      recipient: 'OKAJSGD97ADFUGASD'
+   },
+   {
+      amount: 50,
+      sender: 'LJHASD8FG8SADGFB',
+      recipient: 'GKJASD8F7G08SADGF'
+   }
+];
+const nonce = 100;
 
-bitcoin.createNewTransaction(100, 'ALEXJE74U2HFV832B48V', 'JENNF76QWG9E7F6QWG');
+console.log(bitcoin.hashBlock(previousBlockHash, currentBlockData, nonce));
 
-bitcoin.createNewBlock(1113, '93FSEJGF983', 'JNAWESFBDRG');
+// bitcoin.createNewBlock(2435, '1U3G8T41038', '93FSEJGF983');
 
-bitcoin.createNewTransaction(50, 'ALEXJE74U2HFV832B48V', 'JENNF76QWG9E7F6QWG');
-bitcoin.createNewTransaction(300, 'ALEXJE74U2HFV832B48V', 'JENNF76QWG9E7F6QWG');
-bitcoin.createNewTransaction(200, 'ALEXJE74U2HFV832B48V', 'JENNF76QWG9E7F6QWG');
+// bitcoin.createNewTransaction(100, 'ALEXJE74U2HFV832B48V', 'JENNF76QWG9E7F6QWG');
 
-bitcoin.createNewBlock(2753, 'JNAWESFBDRG', 'A8WSAHSVDFH');
+// bitcoin.createNewBlock(1113, '93FSEJGF983', 'JNAWESFBDRG');
 
-console.log(bitcoin);
-console.log(bitcoin.chain[2]);
+// bitcoin.createNewTransaction(50, 'ALEXJE74U2HFV832B48V', 'JENNF76QWG9E7F6QWG');
+// bitcoin.createNewTransaction(300, 'ALEXJE74U2HFV832B48V', 'JENNF76QWG9E7F6QWG');
+// bitcoin.createNewTransaction(200, 'ALEXJE74U2HFV832B48V', 'JENNF76QWG9E7F6QWG');
+
+// bitcoin.createNewBlock(2753, 'JNAWESFBDRG', 'A8WSAHSVDFH');
+
+// console.log(bitcoin);
+// console.log(bitcoin.chain[2]);
