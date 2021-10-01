@@ -3,6 +3,8 @@ const sha256 = require('sha256');
 function Blockchain() {
    this.chain = []; // Stores all the blocks that we create and mine
    this.pendingTransactions = []; // Stores all the new transactions created before they're placed into a block and mined
+
+   this.createNewBlock(100, '0', '0'); // This will generate the first block of our blockchain, a.k.a. 'genesis block'
 }
 
 // If we'd want to do the same with a JS class instead of a construction function it would be:
