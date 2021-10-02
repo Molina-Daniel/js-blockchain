@@ -2,6 +2,7 @@ const express = require('express')
 const app = express()
 const Blockchain = require('./blockchain');
 const uuid = require('uuid').v1;
+const port = process.argv[2];
 
 const nodeAddress = uuid().split('-').join(''); // Removes the dashes (---) from the uuid
 
@@ -43,6 +44,6 @@ app.get('/mine', function (req, res) {
    })
 });
  
-app.listen(3000, function () {
-   console.log('Listening on port 3000... http://localhost:3000/');
+app.listen(port, function () {
+   console.log(`Listening on port ${ port }... http://localhost:${ port }/`);
 });
