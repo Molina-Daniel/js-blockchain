@@ -1,8 +1,12 @@
 const sha256 = require('sha256');
+const currentNodeUrl = process.argv[3];
 
 function Blockchain() {
    this.chain = []; // Stores all the blocks that we create and mine
    this.pendingTransactions = []; // Stores all the new transactions created before they're placed into a block and mined
+
+   this.currentNodeUrl = currentNodeUrl;
+   this.networkNoder = []; // We'll fill this array with all the URLs connected to the Network
 
    this.createNewBlock(100, '0', '0'); // This will generate the first block of our blockchain, a.k.a. 'genesis block'
 }
