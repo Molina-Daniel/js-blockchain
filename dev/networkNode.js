@@ -55,6 +55,7 @@ app.post('/register-and-broadcast-node', function (req, res) {
    const regNodesPromises = [];
    bitcoin.networkNodes.forEach(networkNodeUrl => {
       // register the newNodeUrl by hitting '/register-node' endpoint
+      console.log(networkNodeUrl);
       regNodesPromises.push(
          axios({
             method: 'post',
@@ -68,6 +69,7 @@ app.post('/register-and-broadcast-node', function (req, res) {
 
    Promise.all(regNodesPromises)
    .then(data => {
+      // console.log("1", data);
       return axios({
          method: 'post',
          url: newNodeUrl + '/register-nodes-bulk',
@@ -77,8 +79,10 @@ app.post('/register-and-broadcast-node', function (req, res) {
       })
    })
    .then(data => {
+      // console.log("2", data);
       res.json({ note: 'New node registered with network successfully.'});
    });
+
 });
 
 // Register a node with the network
@@ -86,18 +90,34 @@ app.post('/register-node', function (req, res) {
    const newNodeUrl = req.body.newNodeUrl;
    const nodeNotAlreadyPresent = bitcoin.networkNodes.indexOf(newNodeUrl) == -1;
    const notCurrentNode = bitcoin.currentNodeUrl !== newNodeUrl;
+
    if (nodeNotAlreadyPresent && notCurrentNode) {
       bitcoin.networkNodes.push(newNodeUrl);
       res.json({ note: 'New node registered successfully' });
    } else {
       res.json({ note: 'The node is already registered'});
-   }
-})
+   };
+});
 
 // Register multiple nodes at once
 app.post('/register-nodes-bulk', function (req, res) {
+   const allNetworkNodes = req.body.allNetworkNodes;
+
+   allNetworkNodes.forEach(networkNodeUrl => {
+      const nodeNotAlreadyPresent = bitcoin.networkNodes.indexOf(networkNodeUrl) == -1;
+      const notCurrentNode = bitcoin.currentNodeUrl !== networkNodeUrl;
+      //---------------------------------------
+      // console.log(notCurrentNode); // for debugging
+      // console.log(bitcoin.currentNodeUrl, networkNodeUrl);
+      //-------------------------------------
+
+      if (nodeNotAlreadyPresent && notCurrentNode) {
+         bitcoin.networkNodes.push(networkNodeUrl);
+      }
+   });
    
-})
+   res.json({ note: 'Bulk registration successfully' });
+});
  
 app.listen(port, function () {
    console.log(`Listening on port ${ port }... http://localhost:${ port }/`);
