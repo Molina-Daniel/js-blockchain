@@ -199,6 +199,57 @@ app.post('/register-nodes-bulk', function (req, res) {
    
    res.json({ note: 'Bulk registration successfully' });
 });
+
+app.get('/consensus', function (req, res) {
+   // request all the blockchains in the other network nodes
+   const requestPromises = [];
+   bitcoin.networkNodes.forEach(networkNodeUrl => {
+      requestPromises.push(
+         axios({
+            method: 'get',
+            url: networkNodeUrl + '/blockchain',
+            responseType: 'json'
+          })
+      )
+   })
+
+   Promise.all(requestPromises)
+   .then(blockchains => { // it returns an array with all the blockchain inside of the network
+      // console.log('Blockchains:', blockchains);
+      const currentBlockchainLength = bitcoin.chain.length;
+      let maxChainLength = currentBlockchainLength;
+      let newLongestChain = null;
+      let newPendingTransactions = null;
+
+      // check if there is a longer chain than the current one and replace the above variables
+      blockchains.forEach(blockchain => {
+         // console.log('Blockchain:', blockchain);
+         // console.log('Max Chain Length;', maxChainLength);
+         // console.log('Blockchain length:', blockchain.data.chain.length);
+         if (blockchain.data.chain.length > maxChainLength) {
+            maxChainLength = blockchain.data.chain.length;
+            newLongestChain = blockchain.data.chain;
+            newPendingTransactions = blockchain.data.pendingTransactions;
+         }
+      })
+
+      // if new longest chain is found, check if it's valid and replace it in the current blockchain
+      if (!newLongestChain || (newLongestChain && !bitcoin.chainIsValid(newLongestChain))) {
+         res.json({
+            note: 'Current chain has not been replaced',
+            chain: bitcoin.chain
+         });
+      } else if (newLongestChain && bitcoin.chainIsValid(newLongestChain)) {
+         bitcoin.chain = newLongestChain;
+         bitcoin.pendingTransactions = newPendingTransactions;
+         res.json({
+            note: 'This chain has been replaced',
+            chain: bitcoin.chain
+         })
+      }
+   })
+   .catch(err => console.log('Something went wrong...', err))
+})
  
 app.listen(port, function () {
    console.log(`Listening on port ${ port }... http://localhost:${ port }/`);
