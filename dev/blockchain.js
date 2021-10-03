@@ -55,7 +55,7 @@ Blockchain.prototype.createNewTransaction = function (amount, sender, recipient)
 
 Blockchain.prototype.addTransactionToPendingTransactions = function (transactionObj) {
    this.pendingTransactions.push(transactionObj);
-   
+
    return this.getLastBlock()['index'] + 1;
 }
 
@@ -79,6 +79,49 @@ Blockchain.prototype.proofOfWork = function (previousBlockHash, currentBlockData
    }
 
    return nonce;
+}
+
+Blockchain.prototype.chainIsValid = function (blockchain) {
+   let validChain = true;
+
+   for (let i = 1; i < blockchain.length; i++) {
+      const currentBlock = blockchain[i];
+      const prevBlock = blockchain[i -1];
+      const blockHash = this.hashBlock(
+         prevBlock['hash'],
+         { 
+            transactions: currentBlock['transactions'],
+            index: currentBlock['index']
+         },
+         currentBlock['nonce']
+      );
+
+      // we hash every block and make sure that the hash starts with '0000'
+      if (blockHash.substring(0,4) !== '0000') {
+         validChain = false;
+      }
+      
+      // check all the hashes align properly
+      if (currentBlock['previousBlockHash'] !== prevBlock['hash']) {
+         validChain = false;
+      }
+
+      // console.log('previousBlockHash =>', prevBlock['hash']);
+      // console.log('currentBlockHash =>', currentBlock['hash']);
+   }
+
+   // check the genesis block has the correct data we hardcoded
+   const genesisBlock = blockchain[0];
+   const correctNonce = genesisBlock['nonce'] === 100;
+   const correctPreviousBlockHash = genesisBlock['previousBlockHash'] === '0';
+   const correctHash = genesisBlock['hash'] === '0';
+   const correctTransactions = genesisBlock['transactions'].length === 0;
+
+   if (!correctNonce || !correctPreviousBlockHash || !correctHash || !correctTransactions) {
+      validChain = false;
+   }
+
+   return validChain;
 }
 
 
