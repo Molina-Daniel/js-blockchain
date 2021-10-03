@@ -17,10 +17,39 @@ app.get('/blockchain', function (req, res) {
    res.send(bitcoin);
 });
 
-// End-point to create a transaction in the blockchain
+// Create a new transaction and broadcast it to the whole network
+app.post('/transaction/broadcast', function (req, res) {
+   // create a new transaction and add it to the pendingTransactions array of the current node
+   const newTransaction = bitcoin.createNewTransaction(req.body.amount, req.body.sender, req.body.recipient);
+   bitcoin.addTransactionToPendingTransactions(newTransaction);
+
+   // broadcast the new transaction we just created to the other network nodes
+   const requestPromises = [];
+   bitcoin.networkNodes.forEach(networkNodeUrl => {
+
+      requestPromises.push(
+         axios({
+            method: 'post',
+            url: networkNodeUrl + '/transaction',
+            data: {
+               newTransaction
+            }
+         })
+      );
+   });
+
+   Promise.all(requestPromises)
+   .then(data => {
+      console.log('Transaction', data);
+      res.json({ note: 'Transaction created and broadcasted successfully.'});
+   });
+});
+
+// Include the new transaction in the node
 app.post('/transaction', function (req, res) {
-   const blockIndex = bitcoin.createNewTransaction(req.body.amount, req.body.sender, req.body.recipient);
-   res.json({ note: `Trasaction will be added in block ${blockIndex}.` });
+   const newTransaction = req.body.newTransaction;
+   const blockIndex = bitcoin.addTransactionToPendingTransactions(newTransaction);
+   res.json({ note: `Transaction will be added in block ${ blockIndex }.`});
 });
 
 // End-point to mine/create a new block
@@ -55,7 +84,7 @@ app.post('/register-and-broadcast-node', function (req, res) {
    const regNodesPromises = [];
    bitcoin.networkNodes.forEach(networkNodeUrl => {
       // register the newNodeUrl by hitting '/register-node' endpoint
-      console.log(networkNodeUrl);
+      // console.log(networkNodeUrl);
       regNodesPromises.push(
          axios({
             method: 'post',
