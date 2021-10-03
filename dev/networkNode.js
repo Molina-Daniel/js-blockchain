@@ -3,6 +3,7 @@ const app = express()
 const Blockchain = require('./blockchain');
 const uuid = require('uuid').v1;
 const port = process.argv[2];
+const axios = require('axios').default;
 
 const nodeAddress = uuid().split('-').join(''); // Removes the dashes (---) from the uuid
 
@@ -46,8 +47,39 @@ app.get('/mine', function (req, res) {
 
 // Resgister a new node and broadcast it to the whole network
 app.post('/register-and-broadcast-node', function (req, res) {
-   const newNodeUrl = req.body.newNodeUrl
-})
+   const newNodeUrl = req.body.newNodeUrl;
+   if (bitcoin.networkNodes.indexOf(newNodeUrl) == -1) {
+      bitcoin.networkNodes.push(newNodeUrl);
+   };
+
+   const regNodesPromises = [];
+   bitcoin.networkNodes.forEach(networkNodeUrl => {
+      // register the newNodeUrl by hitting '/register-node' endpoint
+      regNodesPromises.push(
+         axios({
+            method: 'post',
+            url: networkNodeUrl + '/register-node',
+            data: {
+              newNodeUrl: newNodeUrl
+            }
+          })
+      );
+   });
+
+   Promise.all(regNodesPromises)
+   .then(data => {
+      return axios({
+         method: 'post',
+         url: newNodeUrl + '/register-nodes-bulk',
+         data: {
+           allNetworkNodes: [ ...bitcoin.networkNodes, bitcoin.currentNodeUrl ]
+         }
+      })
+   })
+   .then(data => {
+      res.json({ note: 'New node registered with network successfully.'});
+   });
+});
 
 // Register a node with the network
 app.post('/register-node', function (req, res) {
@@ -55,7 +87,7 @@ app.post('/register-node', function (req, res) {
 })
 
 // Register multiple nodes at once
-app.post('/register-node-bulk', function (req, res) {
+app.post('/register-nodes-bulk', function (req, res) {
    
 })
  

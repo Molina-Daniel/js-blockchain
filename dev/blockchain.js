@@ -6,7 +6,7 @@ function Blockchain() {
    this.pendingTransactions = []; // Stores all the new transactions created before they're placed into a block and mined
 
    this.currentNodeUrl = currentNodeUrl;
-   this.networkNoder = []; // We'll fill this array with all the URLs connected to the Network
+   this.networkNodes = []; // We'll fill this array with all the URLs connected to the Network
 
    this.createNewBlock(100, '0', '0'); // This will generate the first block of our blockchain, a.k.a. 'genesis block'
 }
