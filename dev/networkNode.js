@@ -40,7 +40,7 @@ app.post('/transaction/broadcast', function (req, res) {
 
    Promise.all(requestPromises)
    .then(data => {
-      console.log('Transaction', data);
+      // console.log('Transaction', data);
       res.json({ note: 'Transaction created and broadcasted successfully.'});
    });
 });
@@ -54,7 +54,7 @@ app.post('/transaction', function (req, res) {
 
 // End-point to mine/create a new block
 app.get('/mine', function (req, res) {
-   // res.send(bitcoin.getLastBlock().hash);
+   // first we create/mine a new block
    const lastBlock = bitcoin.getLastBlock();
    const previousBlockHash = lastBlock['hash'];
    const currentBlockData = {
@@ -63,16 +63,68 @@ app.get('/mine', function (req, res) {
    };
    const nonce = bitcoin.proofOfWork(previousBlockHash, currentBlockData);
    const blockHash = bitcoin.hashBlock(previousBlockHash, currentBlockData, nonce);
-
-   bitcoin.createNewTransaction(12.5, "00", nodeAddress);
-
    const newBlock = bitcoin.createNewBlock(nonce, previousBlockHash, blockHash);
 
-   res.json({
-      note: "New block mined successfully",
-      block: newBlock
+   // then we broadcast the new block to the other network nodes
+   const requestPromises = [];
+   bitcoin.networkNodes.forEach(networkNodeUrl => {
+      requestPromises.push(
+         axios({
+            method: 'post',
+            url: networkNodeUrl + '/receive-new-block',
+            data: {
+               newBlock: newBlock
+            }
+          })
+      );
+   });
+
+   Promise.all(requestPromises)
+   .then(data => {
+      // we also create and broadcast the miner reward transaction
+      return axios({
+         method: 'post',
+         url: bitcoin.currentNodeUrl + '/transaction/broadcast',
+         data: {
+            amount: 12.5,
+            sender: "00",
+            receiver: nodeAddress
+         }
+       })
    })
+   .then(
+      res.json({
+         note: "New block mined and broadcast successfully",
+         block: newBlock
+      })
+   );
 });
+
+// Includes the new block mined in a specific network node after evaluates its legitimacy
+app.post('/receive-new-block', function (req, res) {
+   const newBlock = req.body.newBlock;
+
+   // check the previous block hash
+   const lastBlock = bitcoin.getLastBlock();
+   const correctHash = lastBlock.hash === newBlock.previousBlockHash;
+
+   // check the correct index of the new block
+   const correctIndex = lastBlock.index + 1 === newBlock.index;
+
+   if (correctHash && correctIndex) {
+      bitcoin.chain.push(newBlock);
+      bitcoin.pendingTransactions = [];
+      res.json({ 
+         note: 'New block received and accepted',
+         newBlock: newBlock
+      })
+   } else {
+      res.json({
+         note: 'New block rejected',
+         newBlock: newBlock
+      })
+   }
+})
 
 // Resgister a new node and broadcast it to the whole network
 app.post('/register-and-broadcast-node', function (req, res) {
