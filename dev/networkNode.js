@@ -250,7 +250,23 @@ app.get('/consensus', function (req, res) {
    })
    .catch(err => console.log('Something went wrong...', err))
 })
- 
+
+app.get('/block/:blockHash', function (req, res) {
+   const blockHash = req.params.blockHash;
+   const correctBlock = bitcoin.getBlock(blockHash);
+   res.json({
+      block: correctBlock
+   });
+});
+
+app.get('/transaction/:transactionId', function (req, res) {
+   
+});
+
+app.get('/address/:address', function (req, res) {
+   
+});
+
 app.listen(port, function () {
    console.log(`Listening on port ${ port }... http://localhost:${ port }/`);
 });
