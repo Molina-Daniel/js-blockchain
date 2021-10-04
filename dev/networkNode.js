@@ -251,16 +251,27 @@ app.get('/consensus', function (req, res) {
    .catch(err => console.log('Something went wrong...', err))
 })
 
+// Returns the block that matches the Hash
 app.get('/block/:blockHash', function (req, res) {
    const blockHash = req.params.blockHash;
    const correctBlock = bitcoin.getBlock(blockHash);
+
    res.json({
       block: correctBlock
    });
+
 });
 
+// Returns the transaction that matches the Transaction Id and the block where it is
 app.get('/transaction/:transactionId', function (req, res) {
-   
+   const transactionId = req.params.transactionId;
+   const transactionData = bitcoin.getTransaction(transactionId);
+
+   res.json({
+      transaction: transactionData.transaction,
+      block: transactionData.block
+   });
+
 });
 
 app.get('/address/:address', function (req, res) {
